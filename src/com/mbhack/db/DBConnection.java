@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Properties;
 
 import com.mbhack.payload.ConsumerPayload;
@@ -88,11 +89,11 @@ public class DBConnection {
 						System.out.println("selectSpotQuery - Parking spot found.");
 						return true;
 					} else {
-						System.out.println("selectSpotQuery - Parking spot not found");
+						System.out.println("selectSpotQuery - Parking spot not found 1.");
 						return false;
 					}
 				} else {
-					System.out.println("selectSpotQuery - Parking spot not found");
+					System.out.println("selectSpotQuery - Parking spot not found 2.");
 					return false;
 				}
 				
@@ -129,5 +130,24 @@ public class DBConnection {
 				throw e;
 			}
 			
+		}
+		
+		public void insertToConsumerTable(ConsumerPayload cp) throws Exception {
+			try {
+				String query = "insert into consumer(consumer_Id, place_id, base_price, start_time, end_time) " +
+                 "values(?, ?, ?, ?, ?)";
+				PreparedStatement preparedStmt = conn.prepareStatement(query);
+				preparedStmt.setString(1, cp.getConsumerId());
+				preparedStmt.setString(2, cp.getPlaceId());
+				preparedStmt.setString(3, cp.getBasePrice());
+				//preparedStmt.setString(4, "NOW()");
+				preparedStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+				preparedStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+				preparedStmt.execute();
+			} catch (Exception e) {
+				System.out.println("updateConsumerTable - QueryFailed!");
+				e.printStackTrace();
+				throw e;
+			}
 		}
 }

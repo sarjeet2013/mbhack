@@ -33,7 +33,8 @@ public class ParkingConsumer {
 	  @Produces(MediaType.APPLICATION_JSON)
 	  public Response add(ConsumerPayload cp) {
 	    try {
-	       System.out.println("Got Add request. consumerId: " + cp.getConsumerId() + ", placeId: " + cp.getPlaceId());
+	       System.out.println("Got ParkingConsumer.Add request. consumerId: " + cp.getConsumerId() + ", placeId: " +
+	         cp.getPlaceId() + ", basePrice: " + cp.getBasePrice());
 	  	   DBConnection conn = DBConnection.getConnection();
     	   if (!conn.selectSpotQuery(cp)) {
     		   System.out.println("ParkingConsumer.add - Could not select parking spot.");
@@ -45,10 +46,12 @@ public class ParkingConsumer {
     		   System.out.println("ParkingConsumer.add - Could not make spot unavailable.");
     		   return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(STATUS_ERROR).build();
     	   }
+    	   
+    	   //Create entry in the consumer table
+    	   conn.insertToConsumerTable(cp);
+    	   System.out.println("ParkingConsumer.add - Inserted into consumer table.");
+   	   
     	   //Delete from google
-    	   //GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
-    	   //Place place = new PlaceBuilder(name, lat, lng, types)
-    	   //client.deletePlace(place, extraParams);
     	   deletePlace(cp.getPlaceId());
 
 	       return Response.status(Response.Status.OK).entity(STATUS_OK).build();

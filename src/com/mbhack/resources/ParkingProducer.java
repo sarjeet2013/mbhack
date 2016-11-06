@@ -37,7 +37,7 @@ public class ParkingProducer {
            } else {
     	       return Response.status(Response.Status.OK).entity(STATUS_ERROR).build();
            }
-           System.out.println("Got Add request. name: " + producerPayload.getName() + ", address: "+ producerPayload.getAddress() +
+           System.out.println("Got ParkingProducer.Add request. name: " + producerPayload.getName() + ", address: "+ producerPayload.getAddress() +
         		   ", phone: " + producerPayload.getPhone() +", parkingType: " + producerPayload.getParkingType() + ", isCharging: " + producerPayload.getIsCharging()+
         		   ", isAvailable: " + producerPayload.getIsAvailable() + ", isHandicapped: " + producerPayload.getIsHandicapped() +", producerId:" +
         		   producerPayload.getProducerId() +", needRfId: " + producerPayload.getNeedRfid() + ", lat: " + producerPayload.getLat() +

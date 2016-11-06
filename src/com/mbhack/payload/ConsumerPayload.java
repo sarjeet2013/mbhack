@@ -3,6 +3,8 @@ package com.mbhack.payload;
 public class ConsumerPayload {
    private String consumerId;
    private String placeId;
+   private String basePrice;
+   
    
    public String getConsumerId() {
 	   return consumerId;
@@ -16,5 +18,12 @@ public class ConsumerPayload {
    }
    public void setPlaceId(String placeId) {
 	   this.placeId = placeId;
+   }
+
+   public String getBasePrice() {
+	   return basePrice;
+   }
+   public void setBasePrice(String basePrice) {
+	   this.basePrice = basePrice;
    }
 }
