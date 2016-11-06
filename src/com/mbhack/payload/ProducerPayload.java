@@ -14,7 +14,9 @@ public class ProducerPayload {
   private boolean isHandicapped;
   private String producerId;
   private boolean needRfid;
-  
+  private String lat;
+  private String longi;
+
   public String getName() {
 	  return name;
   }
@@ -42,14 +44,7 @@ public class ProducerPayload {
   public void setParkingType(String parkingType) {
 	  this.parkingType = parkingType;
   }
-  /*
-  public String getPlaceId() {
-	  return placeId;
-  }
-  public void setPlaceId(String placeId) {
-	  this.placeId = placeId;
-  }*/
-
+ 
   public boolean getIsCharging() {
 	  return isCharging;
   }
@@ -83,5 +78,19 @@ public class ProducerPayload {
   }
   public void setNeedRfid(boolean needRfid) {
 	  this.needRfid = needRfid;
+  }
+  
+  public String getLat() {
+	  return lat;
+  }
+  public void setLat(String lat) {
+	  this.lat = lat;
+  }
+  
+  public String getLongi() {
+	  return longi;
+  }
+  public void setLongi(String longi) {
+	  this.longi = longi;
   }
 }

@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/")
 public class ParkingService {
+	public static String API_KEY = "AIzaSyDADxx9jWkVWrxKwcKsRL1g62phDc97zzU";
 
 	 //private Response failureResponse(Exception ex, Response.Status httpStatus, String logMessage){
 //       return Response.status(httpStatus).entity(new JsonObject(logMessage +". " + ex.getMessage())).build();

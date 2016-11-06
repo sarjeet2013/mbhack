@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
 import com.mbhack.db.DBConnection;
 import com.mbhack.payload.ProducerPayload;
 
+import se.walkercrou.places.GooglePlaces;
+
 @Path("/producer")
 public class ParkingProducer {
 	
@@ -18,7 +20,7 @@ public class ParkingProducer {
 	  @POST
 	  @Path("/add")
 	  @Produces(MediaType.APPLICATION_JSON)
-	  public Response getInfo(ProducerPayload producerPayload) {
+	  public Response add(ProducerPayload producerPayload) {
 	    try {
            System.out.println("Got Add request. name: " + producerPayload.getName() + ", address: "+ producerPayload.getAddress() +
         		   ", phone: " + producerPayload.getPhone() +", parkingType: " + producerPayload.getParkingType() + ", isCharging: " + producerPayload.getIsCharging()+
@@ -26,6 +28,9 @@ public class ParkingProducer {
         		   producerPayload.getProducerId() +", needRfId: " + producerPayload.getNeedRfid());
            DBConnection conn = DBConnection.getConnection();
            conn.insertProducer(producerPayload);
+           
+           //GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
+           //client
            
 	       return Response.status(Response.Status.OK).entity(STATUS_OK).build();
 	    }catch (Exception e) {

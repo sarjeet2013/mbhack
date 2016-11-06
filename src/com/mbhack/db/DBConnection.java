@@ -53,7 +53,7 @@ public class DBConnection {
 			//		", " + pp.getProducerId() + ", " + pp.getNeedRfid() + ")";
 				
 			String query = "insert into test(name, address, phone, parking_type, is_charging, is_available," +  
-					"is_handicapped, producer_id, need_rfid) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					"is_handicapped, producer_id, need_rfid, lat, longi) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			PreparedStatement preparedStmt = conn.prepareStatement(query);
 			preparedStmt.setString(1, pp.getName());
@@ -65,8 +65,9 @@ public class DBConnection {
 			preparedStmt.setBoolean(7, pp.getIsHandicapped());
 			preparedStmt.setString(8, pp.getProducerId());
 			preparedStmt.setBoolean(9, pp.getNeedRfid());
-			
-			
+			preparedStmt.setString(10, pp.getLat());
+			preparedStmt.setString(11, pp.getLongi());
+
 			preparedStmt.execute();
 			} catch (Exception e) {
 				System.out.println("QueryFailed!");
