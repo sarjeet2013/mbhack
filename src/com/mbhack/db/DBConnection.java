@@ -45,7 +45,7 @@ public class DBConnection {
     	}
 		
 		// values("user1", "House No 1, City test, CA", "111-111-1111", "suv", false, true, false, 1, True);
-		public void insertProducer(ProducerPayload pp){
+		public void insertProducer(ProducerPayload pp, String placeId){
 			try {
 			//String query = "insert into test(name, address, phone, parking_type, is_charging, is_available," +  
 			//		"is_handicapped, producer_id, need_rfid) values (" + pp.getName() + ", " + pp.getAddress() + ", " + pp.getPhone() +
@@ -53,7 +53,7 @@ public class DBConnection {
 			//		", " + pp.getProducerId() + ", " + pp.getNeedRfid() + ")";
 				
 			String query = "insert into test(name, address, phone, parking_type, is_charging, is_available," +  
-					"is_handicapped, producer_id, need_rfid, lat, longi) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					"is_handicapped, producer_id, need_rfid, lat, longi, place_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			PreparedStatement preparedStmt = conn.prepareStatement(query);
 			preparedStmt.setString(1, pp.getName());
@@ -67,6 +67,7 @@ public class DBConnection {
 			preparedStmt.setBoolean(9, pp.getNeedRfid());
 			preparedStmt.setString(10, pp.getLat());
 			preparedStmt.setString(11, pp.getLongi());
+			preparedStmt.setString(12, placeId);
 
 			preparedStmt.execute();
 			} catch (Exception e) {
