@@ -3,9 +3,11 @@ package com.mbhack.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import com.mbhack.payload.ConsumerPayload;
 import com.mbhack.payload.ProducerPayload;
 
 public class DBConnection {
@@ -71,11 +73,30 @@ public class DBConnection {
 
 			preparedStmt.execute();
 			} catch (Exception e) {
-				System.out.println("QueryFailed!");
+				System.out.println("insertProducer - QueryFailed!");
 				e.printStackTrace();
 				
 			}
 				
+		}
+		
+		public boolean selectSpotQuery(ConsumerPayload cp) {
+			
+			try {
+				String query = "select * from test where is_available=true and place_id=?";
+				PreparedStatement preparedStmt = conn.prepareStatement(query);
+				preparedStmt.setString(1, cp.getPlaceId());
+				if (preparedStmt.execute()) {
+					ResultSet rs = preparedStmt.getResultSet();
+					if (rs.first()) return true;
+					else return false;
+				} else return false;
+				
+			} catch (SQLException e) {
+				System.out.println("selectSpotQuery - QueryFailed!");
+				e.printStackTrace();
+			}
+			return false;
 		}
 
 

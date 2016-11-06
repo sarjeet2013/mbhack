@@ -25,8 +25,6 @@ public class ParkingProducer {
 	  @Produces(MediaType.APPLICATION_JSON)
 	  public Response add(ProducerPayload producerPayload) {
 	    try {
-
-
            
            GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
            PlaceBuilder builder = new PlaceBuilder(producerPayload.getName(), Double.parseDouble(producerPayload.getLat()),
