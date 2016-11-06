@@ -11,6 +11,7 @@ import com.mbhack.db.DBConnection;
 import com.mbhack.payload.ProducerPayload;
 
 import se.walkercrou.places.GooglePlaces;
+import se.walkercrou.places.PlaceBuilder;
 
 @Path("/producer")
 public class ParkingProducer {
@@ -29,8 +30,10 @@ public class ParkingProducer {
            DBConnection conn = DBConnection.getConnection();
            conn.insertProducer(producerPayload);
            
-           //GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
-           //client
+           GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
+           PlaceBuilder builder = new PlaceBuilder(producerPayload.getName(), Double.parseDouble(producerPayload.getLat()),
+        		   Double.parseDouble(producerPayload.getLongi()), "parking");
+           client.addPlace(builder, true);
            
 	       return Response.status(Response.Status.OK).entity(STATUS_OK).build();
 	    }catch (Exception e) {
