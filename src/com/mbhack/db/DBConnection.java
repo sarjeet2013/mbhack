@@ -9,7 +9,11 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import com.mbhack.payload.ConsumerPayload;
+import com.mbhack.payload.PlaceBuilderData;
 import com.mbhack.payload.ProducerPayload;
+
+import se.walkercrou.places.Place;
+import se.walkercrou.places.PlaceBuilder;
 
 public class DBConnection {
 	// The JDBC Connector Class.
@@ -104,28 +108,34 @@ public class DBConnection {
 			}
 		}
 
-		public boolean makeUnavailable(ConsumerPayload cp) throws Exception {
+		public boolean changeIsAvailable(ConsumerPayload cp, boolean isAvailable) throws Exception {
 			try {
 
-				String query = "update producer SET is_available=false where place_id=?";
+				String query;
+				if (isAvailable) {
+					query = "update producer SET is_available=true where place_id=?";
+				} else {
+					query = "update producer SET is_available=false where place_id=?";
+				}
+
 				PreparedStatement preparedStmt = conn.prepareStatement(query);
 				preparedStmt.setString(1, cp.getPlaceId());
 				if (!preparedStmt.execute()) {
 					if (preparedStmt.getUpdateCount() > 0) {
-						System.out.println("makeUnavailable - Parking spot made unavailable");
+						System.out.println("changeIsAvailable - Parking spot availability set to: " + isAvailable);
 						return true;
 					}
 					else {
-						System.out.println("makeUnavailable - Parking spot could not be made unavailable 1");
+						System.out.println("changeIsAvailable - Could not set parking spot availability to 1:" + isAvailable);
 						return false;
 					}
 				} else {
-					System.out.println("makeUnavailable - Parking spot could not be made unavailable 2");
+					System.out.println("changeIsAvailable - Could not set parking spot availability to 2:" + isAvailable);
 					return false;
 				}
 				
 			} catch (Exception e) {
-				System.out.println("makeUnavailable - QueryFailed!");
+				System.out.println("changeIsAvailable - QueryFailed!");
 				e.printStackTrace();
 				throw e;
 			}
@@ -149,5 +159,99 @@ public class DBConnection {
 				e.printStackTrace();
 				throw e;
 			}
+		}
+
+		public boolean updateConsumerTable(ConsumerPayload cp) throws Exception {
+			try {
+
+				String query = "update consumer SET end_time=? where consumer_Id=? and place_id=?";
+				PreparedStatement preparedStmt = conn.prepareStatement(query);
+				preparedStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+				preparedStmt.setString(2, cp.getConsumerId());
+				preparedStmt.setString(3, cp.getPlaceId());
+				
+				if (!preparedStmt.execute()) {
+					if (preparedStmt.getUpdateCount() > 0) {
+						System.out.println("updateConsumerTable - Update end time for consumer");
+						return true;
+					}
+					else {
+						System.out.println("updateConsumerTable - Failed to update end time for consumer 1");
+						return false;
+					}
+				} else {
+					System.out.println("Update end time for consumer - Failed to update end time for consumer 2");
+					return false;
+				}
+				
+			} catch (Exception e) {
+				System.out.println("updateConsumerTable - QueryFailed!");
+				e.printStackTrace();
+				throw e;
+			}
+			
+		}
+		
+		public PlaceBuilderData getPlaceBuilderData(String placeId) throws Exception {
+			//select name,lat,longi from producer where place_id="qgYvCi0wMDAwMDA1MzgwOTBiNzRkOjgwOGZjOGZmZDkxOjU5YzJjN2E0YzdiZGE1NDc";
+			
+			try {
+				String query = "select name,lat,longi from producer where place_id=?";
+				PreparedStatement preparedStmt = conn.prepareStatement(query);
+				preparedStmt.setString(1, placeId);
+
+				if (preparedStmt.execute()) {
+					ResultSet rs = preparedStmt.getResultSet();
+					if (rs.first()) {
+						PlaceBuilderData builderData = new PlaceBuilderData(rs.getString(1), rs.getString(2), rs.getString(3));
+						System.out.println("getPlaceBuilderData - Parking spot found.");
+						return builderData;
+					} else {
+						System.out.println("getPlaceBuilderData - Parking spot not found 1.");
+						return null;
+					}
+				} else {
+					System.out.println("getPlaceBuilderData - Parking spot not found 2.");
+					return null;
+				}
+				
+			} catch (Exception e) {
+				System.out.println("getPlaceBuilderData - QueryFailed!");
+				e.printStackTrace();
+				throw e;
+			}
+			
+		}
+		
+		//update producer SET place_id=? where lat=? and longi=?
+		public boolean updatePlaceIdInProducerTable(String placeId, PlaceBuilderData pbd) throws Exception {
+			try {
+
+				String query = "update producer SET place_id=? where lat=? and longi=?";
+				PreparedStatement preparedStmt = conn.prepareStatement(query);
+				preparedStmt.setString(1, placeId);
+				preparedStmt.setString(2, pbd.getLat());
+				preparedStmt.setString(3, pbd.getLongi());
+				
+				if (!preparedStmt.execute()) {
+					if (preparedStmt.getUpdateCount() > 0) {
+						System.out.println("updatePlaceIdInProducerTable - Updated place id in producer table");
+						return true;
+					}
+					else {
+						System.out.println("updatePlaceIdInProducerTable - Failed to update place id in producer table 1");
+						return false;
+					}
+				} else {
+					System.out.println("UpdatePlaceIdInProducerTable - Failed to update place id in producer table 2");
+					return false;
+				}
+				
+			} catch (Exception e) {
+				System.out.println("updatePlaceIdInProducerTable - QueryFailed!");
+				e.printStackTrace();
+				throw e;
+			}
+			
 		}
 }

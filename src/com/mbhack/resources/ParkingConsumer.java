@@ -18,12 +18,17 @@ import javax.ws.rs.core.Response;
 
 import com.mbhack.db.DBConnection;
 import com.mbhack.payload.ConsumerPayload;
+import com.mbhack.payload.PlaceBuilderData;
+import com.mbhack.payload.ReturnObject;
 
 import se.walkercrou.places.GooglePlaces;
+import se.walkercrou.places.Place;
 import se.walkercrou.places.PlaceBuilder;
 
 @Path("/consumer")
 public class ParkingConsumer {
+	
+
 	
 	private static String STATUS_OK = "{ \"Status\" : \"Ok\" }";
 	private static String STATUS_ERROR = "{ \"Status\" : \"ERROR\", \"Message\" = \"Unable to get parking spot\" }";
@@ -38,13 +43,15 @@ public class ParkingConsumer {
 	  	   DBConnection conn = DBConnection.getConnection();
     	   if (!conn.selectSpotQuery(cp)) {
     		   System.out.println("ParkingConsumer.add - Could not select parking spot.");
-    		   return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(STATUS_ERROR).build();
+    		   return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+    				   new ReturnObject("ERROR", "ParkingConsumer.add - Could not select parking spot.")).build();
     	   }
     	   
     	   //update producer table to false
-    	   if (!conn.makeUnavailable(cp)) {
+    	   if (!conn.changeIsAvailable(cp, false)) {
     		   System.out.println("ParkingConsumer.add - Could not make spot unavailable.");
-    		   return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(STATUS_ERROR).build();
+    		   return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+    				   new ReturnObject("ERROR", "ParkingConsumer.add - Could not make spot unavailable.")).build();
     	   }
     	   
     	   //Create entry in the consumer table
@@ -54,10 +61,61 @@ public class ParkingConsumer {
     	   //Delete from google
     	   deletePlace(cp.getPlaceId());
 
-	       return Response.status(Response.Status.OK).entity(STATUS_OK).build();
+	       return Response.status(Response.Status.OK).entity(new ReturnObject("OK")).build();
 	    }catch (Exception e) {
-	       throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+	       throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    		   new ReturnObject("ERROR", e.getMessage())).build());
 	    } 
+	  }
+	  
+	  @POST
+	  @Path("/remove")
+	  @Produces(MediaType.APPLICATION_JSON)
+	  public Response remove(ConsumerPayload cp) {
+		try {
+		   System.out.println("Got ParkingConsumer.Add request. consumerId: " + cp.getConsumerId() + ", placeId: " +
+		  	   cp.getPlaceId() + ", basePrice: " + cp.getBasePrice());
+		  DBConnection conn = DBConnection.getConnection();
+		  
+		   //Update consumer table
+			if (!conn.updateConsumerTable(cp)) {
+				System.out.println("ParkingConsumer.remove - Could not update consumer table.");
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    				new ReturnObject("ERROR", "ParkingConsumer.remove - Could not update consumer table")).build();
+			}
+			
+		   //update producer table
+			if (!conn.changeIsAvailable(cp, true)) {
+	    		System.out.println("ParkingConsumer.remove - Could not make spot available.");
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    				new ReturnObject("ERROR", "ParkingConsumer.remove - Could not make spot available.")).build();
+	    	}
+
+		   //add place to Google
+		   PlaceBuilderData pbd = conn.getPlaceBuilderData(cp.getPlaceId());
+		   if (pbd == null) {
+	    		System.out.println("ParkingConsumer.remove - Could not add spot back to Google");
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    				new ReturnObject("ERROR", "ParkingConsumer.remove - Could not add spot back to Google")).build();			   
+		   }
+
+	       GooglePlaces client = new GooglePlaces(ParkingService.API_KEY);
+           PlaceBuilder builder = new PlaceBuilder(pbd.getName(), Double.parseDouble(pbd.getLat()),
+        		   Double.parseDouble(pbd.getLongi()), "parking");
+	       Place place = client.addPlace(builder, true);
+	       
+	       if (!conn.updatePlaceIdInProducerTable(place.getPlaceId(), pbd)) {
+				System.out.println("ParkingConsumer.remove - Failed to update place id in Producer table.");
+	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    				new ReturnObject("ERROR", "ParkingConsumer.remove - Failed to update place id in Producer table.")).build();
+			}
+		
+	       return Response.status(Response.Status.OK).entity(new ReturnObject("OK")).build();
+	    }catch (Exception e) {
+	       throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+	    		   new ReturnObject("ERROR", e.getMessage())).build());
+	    } 
+		  
 	  }
 	  
 	  private void deletePlace(String placeId) {

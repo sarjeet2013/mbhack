@@ -3,7 +3,7 @@ package com.mbhack.payload;
 public class ConsumerPayload {
    private String consumerId;
    private String placeId;
-   private String basePrice;
+   private String basePrice = "0";
    
    
    public String getConsumerId() {

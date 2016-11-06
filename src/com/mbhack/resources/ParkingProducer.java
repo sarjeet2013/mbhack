@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import com.mbhack.db.DBConnection;
 import com.mbhack.payload.ProducerPayload;
+import com.mbhack.payload.ReturnObject;
 
 import se.walkercrou.places.GooglePlaces;
 import se.walkercrou.places.Place;
@@ -35,16 +36,16 @@ public class ParkingProducer {
         	   DBConnection conn = DBConnection.getConnection();
         	   conn.insertProducer(producerPayload, place.getPlaceId());
            } else {
-    	       return Response.status(Response.Status.OK).entity(STATUS_ERROR).build();
+    	       return Response.status(Response.Status.OK).entity(new ReturnObject("ERROR", "Unable to add place to Google.")).build();
            }
            System.out.println("Got ParkingProducer.Add request. name: " + producerPayload.getName() + ", address: "+ producerPayload.getAddress() +
         		   ", phone: " + producerPayload.getPhone() +", parkingType: " + producerPayload.getParkingType() + ", isCharging: " + producerPayload.getIsCharging()+
         		   ", isAvailable: " + producerPayload.getIsAvailable() + ", isHandicapped: " + producerPayload.getIsHandicapped() +", producerId:" +
         		   producerPayload.getProducerId() +", needRfId: " + producerPayload.getNeedRfid() + ", lat: " + producerPayload.getLat() +
         		   ", longi: " + producerPayload.getLongi() + ", place_id: " + place.getPlaceId());
-	       return Response.status(Response.Status.OK).entity(STATUS_OK).build();
+	       return Response.status(Response.Status.OK).entity(new ReturnObject("OK")).build();
 	    }catch (Exception e) {
-	       throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+	       throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ReturnObject("ERROR", e.getMessage())).build());
 	    } 
 	  }
 }
